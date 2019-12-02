@@ -574,7 +574,7 @@ namespace GPM
 	}
 
 	template <typename T>
-	constexpr Vector4<T>& Vector4<T>::Scale(const T p_scale) const
+	constexpr Vector4<T>& Vector4<T>::Scale(const T p_scale)
 	{
 		x *= p_scale;
 		y *= p_scale;
@@ -689,7 +689,7 @@ namespace GPM
 	{
 		const float length = Magnitude();
 
-		if (length > 0.0f)
+		if (length > T(0.0))
 		{
 			x /= length;
 			y /= length;
@@ -751,7 +751,7 @@ namespace GPM
 			Vector4<T> relativeVector = p_end - p_start * p_start.Dot(p_end);
 			relativeVector.Normalize();
 
-			return { (p_start * Tools::Utils::Cos(Tools::Utils::ToRadians(angle))) + (relativeVector * Tools::Utils::Sin(Tools::Utils::ToRadians(angle))) };
+			return { (p_start * Tools::Utils::CosF(Tools::Utils::ToRadians(angle))) + (relativeVector * Tools::Utils::SinF(Tools::Utils::ToRadians(angle))) };
 		}
 
 		if (p_interpolationCoefficient < 0.0f)

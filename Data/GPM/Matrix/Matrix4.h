@@ -52,11 +52,13 @@ namespace GPM
 
 #pragma region Properties
 
+        constexpr bool isIdentity();
+
         constexpr T Determinant();
-        constexpr static T Determinant(const Matrix4& p_matrix);
+        constexpr static T Determinant(const Matrix4<T>& p_matrix);
         
         constexpr Matrix4<T>& Transpose();
-        constexpr static Matrix4<T> Transpose(const Matrix4& p_matrix);
+        constexpr static Matrix4<T> Transpose(const Matrix4<T>& p_matrix);
         
         constexpr Matrix4<T>& Normalize();
         constexpr static Matrix4<T> Normalize(const Matrix4<T>& p_matrix);
@@ -79,22 +81,26 @@ namespace GPM
         template<typename U>
         constexpr static Matrix4<T> CreateTransformation(const Vector3<U>& p_translate, const Quaternion& p_rotation, const Vector3<U>& p_scale);
 
+        constexpr Matrix4<T> Adjugate();
+        constexpr static Matrix4<T> CreateAdjugate(const Matrix4<T>& p_matrix);
+
+        constexpr static Matrix4<T> Inverse(const Matrix4<T>& p_matrix);
+
         static Matrix4<T> LookAt(const Vector3<T>& p_from, const Vector3<T>& p_to, const Vector3<T>& p_up = { 0,1,0 });
 #pragma endregion
 
         //TODO clean these
         //methods
+        
         constexpr void SetColumn(int p_column, const Vector4<T>& p_vector);
         constexpr void SetRow(int p_row, const Vector4<T>& p_vector);
 
-        T GetMinor(Matrix3<T> p_minor);
-
-        Matrix4<T> Inverse();
+        static T GetMinor(Matrix3<T> p_minor);
 
 
 #pragma region Conversions
 
-        constexpr std::string ToString() noexcept;
+        constexpr std::string ToString() const noexcept;
         constexpr static std::string ToString(const Matrix4<T>& p_matrix);
 
 #pragma endregion
@@ -184,7 +190,7 @@ namespace GPM
         /**
          * @brief Multiply scalar to matrix left
          * @param p_left : Multiply this matrix by the other parameter
-         * @param p_scalar : Multiply this scalar to the other parameter
+         * @param p_right : Multiply this scalar to the other parameter
          * @return The copy of the Matrix operation result
          */
         template<typename U>
@@ -201,7 +207,7 @@ namespace GPM
         /**
          * @brief Multiply matrix to matrix left
          * @param p_left : Multiply this matrix by the other parameter
-         * @param p_scalar : Multiply this matrix to the other parameter
+         * @param p_right : Multiply this matrix to the other parameter
          * @return The copy of the Matrix operation result
          */
         template<typename U>
@@ -233,8 +239,9 @@ namespace GPM
         // static Matrix4<T> Multiply(const Matrix4<T>& p_matrix, const Matrix4<T>& p_other);
         template<typename U>
         static Vector4<T> Multiply(const Matrix4<U>& p_matrix, const Vector4<T>& p_vector);
-        static bool Equals(const Matrix4<T>& p_matrix, const Matrix4<T>& p_other);
-        static void Set(Matrix4<T>& p_matrix, const Matrix4<T>& p_other);
+        bool Equals(const Matrix4<T>& p_other);
+        template<typename U>
+        static void Set(Matrix4<T>& p_matrix, const Matrix4<U>& p_other);
 
 #pragma endregion 
 
@@ -246,13 +253,19 @@ namespace GPM
         bool operator==(const Matrix4<T>& p_matrix);
         bool operator!=(const Matrix4<T>& p_matrix);
 
-        void operator=(const Matrix4<T>& p_matrix);
-
+		Matrix4<T>& operator=(const Matrix4<T>& p_matrix);
+    	
+        template<typename U>
+        Matrix4<T>& operator=(const Matrix4<U>& p_matrix);
+    	
         T operator[](int p_position);
 
 #pragma endregion
 
     };
+
+	template<typename T>
+	constexpr std::ostream& operator<<(std::ostream& p_os, const Matrix4<T>& p_matrix);
 
     using Matrix4F = Matrix4<float>;
     using Matrix4L = Matrix4<long>;

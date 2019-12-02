@@ -3,9 +3,10 @@
 #include <utility>
 #include <GPM/Tools/Utils.h>
 
+// const Quaternion Quaternion::identity = Quaternion{ 0.0, 0.0, 0.0, 1.0 };
+
 namespace GPM
 {
-	Quaternion Quaternion::identity = Quaternion{ 0.0, 0.0, 0.0, 1.0 };
 
 #pragma region Constructors & Assignment
 	inline Quaternion::Quaternion()
@@ -255,11 +256,12 @@ namespace GPM
 
 	inline Quaternion Quaternion::Multiply(const Quaternion& p_quaternion) const
 	{
-		const double scalar = w * p_quaternion.w - axis.Dot(p_quaternion.axis);
-
-		const Vector3<double> imaginary = p_quaternion.axis * w + axis * p_quaternion.axis + axis.Cross(p_quaternion.axis);
-
-		return { Quaternion { scalar,imaginary } };
+		Quaternion result;
+		result.axis.x = axis.x * p_quaternion.w + axis.y * p_quaternion.axis.z - axis.z * p_quaternion.axis.y + w * p_quaternion.axis.x;
+		result.axis.y = -axis.x * p_quaternion.axis.z + axis.y * p_quaternion.w + axis.z * p_quaternion.axis.x + w * p_quaternion.axis.y;
+		result.axis.z = axis.x * p_quaternion.axis.y - axis.y * p_quaternion.axis.x + axis.z * p_quaternion.w + w * p_quaternion.axis.z;
+		result.w = -axis.x * p_quaternion.axis.x - axis.y * p_quaternion.axis.y - axis.z * p_quaternion.axis.z + w * p_quaternion.w;
+		return { result };
 
 	}
 
@@ -291,7 +293,7 @@ namespace GPM
 
 		const Quaternion conjugateValue = Conjugate(p_quaternion);
 
-		return { Quaternion {conjugateValue.w * absoluteValue, Vector3<double> {conjugateValue.axis * absoluteValue} } };
+		return { Quaternion {conjugateValue.w * absoluteValue, Vector3<double> {conjugateValue.axis* absoluteValue} } };
 	}
 
 	inline Quaternion& Quaternion::Conjugate()
@@ -394,7 +396,7 @@ namespace GPM
 		}
 		if (Tools::Utils::Abs<double>(dot - (1.0)) < 0.000001)
 		{
-			return identity;
+			return Quaternion{ 0.0, 0.0, 0.0, 1.0 };
 		}
 
 		const double rotAngle = Tools::Utils::Arccos(dot);
@@ -426,7 +428,8 @@ namespace GPM
 		return  { Quaternion { coefficient * p_start.axis.x + p_alpha * p_end.axis.x,
 							coefficient * p_start.axis.y + p_alpha * p_end.axis.y,
 							coefficient * p_start.axis.z + p_alpha * p_end.axis.z,
-							coefficient * p_start.w + p_alpha * p_end.w }.Normalize() };
+							coefficient * p_start.w + p_alpha * p_end.w } // .Normalize(); // Cancel the interpolation ?
+		};
 	}
 
 	inline Quaternion Quaternion::Slerp(const Quaternion& p_start, const Quaternion& p_end,
@@ -439,13 +442,12 @@ namespace GPM
 		const double sn = Tools::Utils::Sin(theta);
 		const double wa = Tools::Utils::Sin(coefficient * theta) / sn;
 		const double wb = Tools::Utils::Sin(p_alpha * theta) / sn;
-
 		result.axis.x = wa * p_start.axis.x + wb * p_end.axis.x;
 		result.axis.y = wa * p_start.axis.y + wb * p_end.axis.y;
 		result.axis.z = wa * p_start.axis.z + wb * p_end.axis.z;
 		result.w = wa * p_start.w + wb * p_end.w;
 
-		result.Normalize();
+		// result.Normalize(); // Cancel the interpolation
 
 		return result;
 	}
@@ -463,7 +465,7 @@ namespace GPM
 
 	inline Quaternion& Quaternion::Normalize()
 	{
-		if (Norm() != 0) {
+		if (Norm() > 0.0) {
 			const double normValue = 1.0 / Norm();
 
 			w *= normValue;
@@ -561,31 +563,60 @@ namespace GPM
 		return { p_quaternion.ToString() };
 	}
 
-	inline Matrix3<double> Quaternion::ToMatrix3() const
+	inline Matrix3<float> Quaternion::ToMatrix3() const
 	{
-		Matrix3<double> result;
+		Matrix3<float> result;
 
-		result.m_data[0] = 2.0 * (w * w + axis.x * axis.x) - 1.0;
-		result.m_data[3] = 2.0 * (axis.x * axis.y - w * axis.z);
-		result.m_data[6] = 2.0 * (axis.x * axis.z + w * axis.y);
+		const float fw = static_cast<float>(w);
+		Vector3<float> faxis{};
+		faxis.x = static_cast<float>(axis.x);
+		faxis.y = static_cast<float>(axis.y);
+		faxis.z = static_cast<float>(axis.z);
 
-		result.m_data[1] = 2.0 * (axis.x * axis.y + w * axis.z);
-		result.m_data[4] = 2.0 * (w * w + axis.y * axis.y) - 1.0;
-		result.m_data[7] = 2.0 * (axis.y * axis.z - w * axis.x);
+		result.m_data[0] = 2.0f * (fw * fw + faxis.x * faxis.x) - 1.0f;
+		result.m_data[3] = 2.0f * (faxis.x * faxis.y - fw * faxis.z);
+		result.m_data[6] = 2.0f * (faxis.x * faxis.z + fw * faxis.y);
 
-		result.m_data[2] = 2.0 * (axis.x * axis.z - w * axis.y);
-		result.m_data[5] = 2.0 * (axis.y * axis.z + w * axis.x);
-		result.m_data[8] = 2.0 * (w * w + axis.z * axis.z) - 1.0;
+		result.m_data[1] = 2.0f * (faxis.x * faxis.y + fw * faxis.z);
+		result.m_data[4] = 2.0f * (fw * fw + faxis.y * faxis.y) - 1.0f;
+		result.m_data[7] = 2.0f * (faxis.y * faxis.z - fw * faxis.x);
+
+		result.m_data[2] = 2.0f * (faxis.x * faxis.z - fw * faxis.y);
+		result.m_data[5] = 2.0f * (faxis.y * faxis.z + fw * faxis.x);
+		result.m_data[8] = 2.0f * (fw * fw + faxis.z * faxis.z) - 1.0f;
 
 		return result;
 	}
 
-	inline Matrix4<double> Quaternion::ToMatrix4() const
+	inline Matrix4<float> Quaternion::ToMatrix4() const
 	{
-		return { Matrix4<double>{ w, -axis.x, -axis.y, -axis.z,
-								axis.x, w, -axis.z, axis.y,
-								axis.y, axis.z, w, -axis.x,
-								axis.z, -axis.y, axis.x, w } };
+		Matrix4<float> result{};
+		const float sqw = static_cast<float>(w * w);
+		const float sqx = static_cast<float>(axis.x * axis.x);
+		const float sqy = static_cast<float>(axis.y * axis.y);
+		const float sqz = static_cast<float>(axis.z * axis.z);
+
+		// invs (inverse square length) is only required if quaternion is not already normalised
+		const float invs = 1.0f / (sqx + sqy + sqz + sqw);
+		result.m_data[0] = (sqx - sqy - sqz + sqw) * invs; // since sqw + sqx + sqy + sqz =1/invs*invs
+		result.m_data[5] = (-sqx + sqy - sqz + sqw) * invs;
+		result.m_data[10] = (-sqx - sqy + sqz + sqw) * invs;
+
+		float tmp1 = static_cast<float>(axis.x * axis.y);
+		float tmp2 = static_cast<float>(axis.z * w);
+		result.m_data[4] = 2.0f * (tmp1 + tmp2) * invs;
+		result.m_data[1] = 2.0f * (tmp1 - tmp2) * invs;
+
+		tmp1 = static_cast<float>(axis.x * axis.z);
+		tmp2 = static_cast<float>(axis.y * w);
+		result.m_data[8] = 2.0f * (tmp1 - tmp2) * invs;
+		result.m_data[2] = 2.0f * (tmp1 + tmp2) * invs;
+		tmp1 = static_cast<float>(axis.y * axis.z);
+		tmp2 = static_cast<float>(axis.x * w);
+		result.m_data[9] = 2.0f * (tmp1 + tmp2) * invs;
+		result.m_data[6] = 2.0f * (tmp1 - tmp2) * invs;
+
+		return { result };
 	}
 
 	inline std::ostream& operator<<(std::ostream& p_stream,
@@ -595,5 +626,5 @@ namespace GPM
 			", z: " << p_quaternion.axis.z << ')';
 		return  { p_stream };
 	}
-#pragma endregion
 }
+#pragma endregion

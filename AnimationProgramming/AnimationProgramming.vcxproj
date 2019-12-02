@@ -177,14 +177,19 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Bone.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\Simulation.h" />
+    <ClInclude Include="include\Skeleton.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\targetver.h" />
+    <ClInclude Include="include\Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AnimationProgramming.cpp" />
+    <ClCompile Include="src\Skeleton.cpp" />
     <ClCompile Include="src\stdafx.cpp" />
+    <ClCompile Include="src\Transform.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

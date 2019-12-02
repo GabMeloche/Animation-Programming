@@ -586,7 +586,7 @@ namespace GPM
 		 * @param p_scale The scalar
 		 * @return The current vector modified
 		 */
-		constexpr Vector4<T>& Scale(const T p_scale) const;
+		constexpr Vector4<T>& Scale(const T p_scale);
 
 		/**
 		 * @brief Calculate the distance between the vector and another

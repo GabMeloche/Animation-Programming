@@ -2,8 +2,6 @@
 #include <cmath>
 #include <iostream>
 
-#include "GPM/Tools/Utils.h"
-
 namespace GPM
 {
 #pragma region Constructor
@@ -22,11 +20,11 @@ namespace GPM
 	}
 
 	template<typename T>
-	constexpr void Vector3<T>::Set(T px, T py, T pz)
+	constexpr void Vector3<T>::Set(T p_x, T p_y, T p_z)
 	{
-		x = px;
-		y = py;
-		z = pz;
+		x = p_x;
+		y = p_y;
+		z = p_z;
 	}
 
 	template<typename T>
@@ -49,13 +47,13 @@ namespace GPM
 
 	template<typename T>
 	template<typename U>
-	constexpr Vector3<T> Vector3<T>::Add(const Vector3<U>& p_vector)
+	constexpr Vector3<T> Vector3<T>::Add(const Vector3<U>& p_other)
 	{
-		x += p_vector.x;
-		y += p_vector.y;
-		z += p_vector.z;
+		x += p_other.x;
+		y += p_other.y;
+		z += p_other.z;
 
-		return  { Vector3<T>(x + p_vector.x, y + p_vector.y, z + p_vector.z) };
+		return  { Vector3<T>(x + p_other.x, y + p_other.y, z + p_other.z) };
 	}
 
 	template<typename T>
@@ -67,29 +65,29 @@ namespace GPM
 
 	template<typename T>
 	template<typename U>
-	constexpr void Vector3<T>::Substract(const Vector3<U>& p_vector)
+	constexpr void Vector3<T>::Subtract(const Vector3<U>& p_other)
 	{
-		x -= p_vector.x;
-		y -= p_vector.y;
-		z -= p_vector.z;
+		x -= p_other.x;
+		y -= p_other.y;
+		z -= p_other.z;
 	}
 
 	template<typename T>
 	template<typename U>
-	constexpr void Vector3<T>::Multiply(const Vector3<U>& p_vector)
+	constexpr void Vector3<T>::Multiply(const Vector3<U>& p_other)
 	{
-		x *= p_vector.x;
-		y *= p_vector.y;
-		z *= p_vector.z;
+		x *= p_other.x;
+		y *= p_other.y;
+		z *= p_other.z;
 	}
 
 	template<typename T>
 	template<typename U>
-	constexpr void Vector3<T>::Divide(const Vector3<U>& p_vector)
+	constexpr void Vector3<T>::Divide(const Vector3<U>& p_other)
 	{
-		x /= p_vector.x;
-		y /= p_vector.y;
-		z /= p_vector.z;
+		x /= p_other.x;
+		y /= p_other.y;
+		z /= p_other.z;
 	}
 
 	template<typename T>
@@ -184,19 +182,19 @@ namespace GPM
 
 	template<typename T>
 	template<typename U>
-	constexpr T Vector3<T>::Dot(const Vector3<U>& p_vector) const
+	constexpr T Vector3<T>::Dot(const Vector3<U>& p_other) const
 	{
-        Vector3<T> tmp = p_vector.Normalized();
+        Vector3<T> tmp = p_other.Normalized();
         Vector3<T> tmp2 = Normalized();
 		return (tmp2.x * tmp.x) + (tmp2.y * tmp.y) + (tmp2.z * tmp.z);
 	}
 
 	template<typename T>
 	template<typename U>
-	constexpr T Vector3<T>::Angle(const Vector3<U>& p_vector) const
+	constexpr T Vector3<T>::Angle(const Vector3<U>& p_other) const
 	{
-		T dot = (x * p_vector.x) + (y * p_vector.y) + (z * p_vector.z);
-		T mag = Magnitude() * p_vector.Magnitude();
+		T dot = (x * p_other.x) + (y * p_other.y) + (z * p_other.z);
+		T mag = Magnitude() * p_other.Magnitude();
 
 		return acos(dot / mag);
 	}
@@ -224,9 +222,9 @@ namespace GPM
 
 	template<typename T>
     template<typename U>
-	constexpr Vector3<T> Vector3<T>::operator-(const Vector3<U>& p_vector) const
+	constexpr Vector3<T> Vector3<T>::operator-(const Vector3<U>& p_other) const
 	{
-		return Vector3<T>(x - p_vector.x, y - p_vector.y, z - p_vector.z);
+		return Vector3<T>(x - p_other.x, y - p_other.y, z - p_other.z);
 	}
 
 	template<typename T>
@@ -237,21 +235,21 @@ namespace GPM
 
 	template<typename T>
     template<typename U>
-	constexpr Vector3<T> Vector3<T>::operator*(const Vector3<U>& p_vector) const
+	constexpr Vector3<T> Vector3<T>::operator*(const Vector3<U>& p_other) const
 	{
-		return Vector3<T>(x * p_vector.x, y * p_vector.y, z * p_vector.z);
+		return Vector3<T>(x * p_other.x, y * p_other.y, z * p_other.z);
 	}
 
 	template<typename T>
     template<typename U>
-	constexpr Vector3<T> Vector3<T>::operator/(const Vector3<U>& p_vector) const
+	constexpr Vector3<T> Vector3<T>::operator/(const Vector3<U>& p_other) const
 	{
-		if (p_vector.x == 0 || p_vector.y == 0 || p_vector.z == 0 || x == 0 || y == 0 || z == 0)
+		if (p_other.x == 0 || p_other.y == 0 || p_other.z == 0 || x == 0 || y == 0 || z == 0)
 		{
 			std::cout << "Can't divide by zero!\n";
 			return Vector3<T>(0, 0, 0);
 		}
-		return Vector3<T>(x / p_vector.x, y / p_vector.y, z / p_vector.z);
+		return Vector3<T>(x / p_other.x, y / p_other.y, z / p_other.z);
 	}
 
 	template <typename T>
@@ -267,33 +265,33 @@ namespace GPM
 
 	template<typename T>
     template<typename U>
-	constexpr inline Vector3<T>& Vector3<T>::operator+=(const Vector3<U> p_vector)
+	constexpr inline Vector3<T>& Vector3<T>::operator+=(const Vector3<U> p_other)
 	{
-		x += p_vector.x;
-		y += p_vector.y;
-		z += p_vector.z;
+		x += p_other.x;
+		y += p_other.y;
+		z += p_other.z;
 
 		return *this;
 	}
 
 	template<typename T>
     template<typename U>
-	constexpr inline Vector3<T>& Vector3<T>::operator-=(const Vector3<U> p_vector)
+	constexpr inline Vector3<T>& Vector3<T>::operator-=(const Vector3<U> p_other)
 	{
-		x -= p_vector.x;
-		y -= p_vector.y;
-		z -= p_vector.z;
+		x -= p_other.x;
+		y -= p_other.y;
+		z -= p_other.z;
 
 		return *this;
 	}
 
 	template<typename T>
     template<typename U>
-	constexpr inline Vector3<T>& Vector3<T>::operator*=(const Vector3<U> p_vector)
+	constexpr inline Vector3<T>& Vector3<T>::operator*=(const Vector3<U> p_other)
 	{
-		x *= p_vector.x;
-		y *= p_vector.y;
-		z *= p_vector.z;
+		x *= p_other.x;
+		y *= p_other.y;
+		z *= p_other.z;
 
 		return *this;
 	}
@@ -310,20 +308,20 @@ namespace GPM
 
 	template<typename T>
     template<typename U>
-	constexpr inline Vector3<T>& Vector3<T>::operator/=(const Vector3<U> p_vector)
+	constexpr inline Vector3<T>& Vector3<T>::operator/=(const Vector3<U> p_other)
 	{
-		x /= p_vector.x;
-		y /= p_vector.y;
-		z /= p_vector.z;
+		x /= p_other.x;
+		y /= p_other.y;
+		z /= p_other.z;
 
 		return *this;
 	}
 
 	template<typename T>
     template<typename U>
-	constexpr inline bool Vector3<T>::operator==(const Vector3<U>& p_vector) const 
+	constexpr inline bool Vector3<T>::operator==(const Vector3<U>& p_other) const
 	{
-		if (x == p_vector.x && y == p_vector.y && z == p_vector.z)
+		if (x == p_other.x && y == p_other.y && z == p_other.z)
 			return true;
 		else
 			return false;
@@ -331,9 +329,9 @@ namespace GPM
 
 	template<typename T>
     template<typename U>
-	constexpr inline bool Vector3<T>::operator!=(const Vector3<U>& p_vector) const 
+	constexpr inline bool Vector3<T>::operator!=(const Vector3<U>& p_other) const 
 	{
-		if (x == p_vector.x && y == p_vector.y && z == p_vector.z)
+		if (x == p_other.x && y == p_other.y && z == p_other.z)
 			return false;
 		else
 			return true;

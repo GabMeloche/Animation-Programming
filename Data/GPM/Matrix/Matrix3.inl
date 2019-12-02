@@ -27,9 +27,11 @@ constexpr Matrix3<T>::Matrix3()
 
 template<typename T>
 constexpr Matrix3<T>::Matrix3(const T p_i0, const T p_i1, const T p_i2,
-    const T p_i3, const T p_i4, const T p_i5,
-    const T p_i6, const T p_i7, const T p_i8)
-    : m_data{ p_i0, p_i1, p_i2, p_i3, p_i4, p_i5, p_i6, p_i7, p_i8 } {}
+                              const T p_i3, const T p_i4, const T p_i5,
+                              const T p_i6, const T p_i7, const T p_i8)
+                              : m_data{ p_i0, p_i1, p_i2,
+                                        p_i3, p_i4, p_i5,
+                                        p_i6, p_i7, p_i8 } {}
 
 template<typename T>
 constexpr Matrix3<T>::Matrix3(const T p_data[9])
@@ -43,7 +45,9 @@ constexpr Matrix3<T>::Matrix3(const Matrix3& p_other)
     memcpy(m_data, p_other.m_data, 9 * sizeof(T));
 }
 
-template<typename T> template<typename U> constexpr Matrix3<T>::Matrix3(const Matrix3<U>& p_other)
+template<typename T>
+template<typename U>
+constexpr Matrix3<T>::Matrix3(const Matrix3<U>& p_other)
 {
     for (unsigned int i = 0; i < 9; ++i)
         m_data[i] = p_other.m_data[i];
@@ -55,7 +59,8 @@ constexpr Matrix3<T>::Matrix3(Matrix3&& p_other) noexcept
     memcpy(m_data, p_other.m_data, 9 * sizeof(T));
 }
 
-template<typename T> constexpr Matrix3<T>& Matrix3<T>::operator=(const Matrix3<T>& p_other)
+template<typename T>
+constexpr Matrix3<T>& Matrix3<T>::operator=(const Matrix3<T>& p_other)
 {
     for (unsigned int i = 0; i < 9; ++i)
         m_data[i] = p_other.m_data[i];
@@ -69,6 +74,14 @@ constexpr Matrix3<T>& Matrix3<T>::operator=(const Matrix3<U>& p_other)
 {
     for (unsigned int i = 0; i < 9; ++i)
         m_data[i] = static_cast<const T>(p_other.m_data[i]);
+
+    return *this;
+}
+
+template<typename T> constexpr Matrix3<T>& Matrix3<T>::operator=(Matrix3<T>&& p_other) noexcept
+{
+    for (unsigned int i = 0; i < 9; ++i)
+        m_data[i] = p_other.m_data[i];
 
     return *this;
 }
@@ -201,7 +214,9 @@ constexpr Matrix3<T> Matrix3<T>::Normalize(const Matrix3<T>& p_matrix)
     return p_matrix.Normalize();
 }
 
-template<typename T> template<typename U> constexpr Matrix3<T>& Matrix3<T>::Translate(const Vector2<U>& p_vector)
+template<typename T>
+template<typename U>
+constexpr Matrix3<T>& Matrix3<T>::Translate(const Vector2<U>& p_vector)
 {
     m_data[2] = p_vector.x;
     m_data[5] = p_vector.y;
@@ -297,7 +312,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix3<T> Matrix3<T>::operator+(const Matrix3<U>& p_other) const
 {
-    return Add(this, p_other);
+    return Add(*this, p_other);
 }
 
 template<typename T>
@@ -332,7 +347,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix3<T> Matrix3<T>::operator-(const Matrix3<U>& p_other) const
 {
-    return Subtract(this, p_other);
+    return Subtract(*this, p_other);
 }
 
 template<typename T>
@@ -397,16 +412,16 @@ constexpr Matrix3<T> Matrix3<T>::operator*(const Matrix3<U>& p_other) const
 
 template<typename T>
 template<typename U>
-constexpr Matrix3<T> Matrix3<T>::operator*(const U p_other) const
+constexpr Matrix3<T> Matrix3<T>::operator*(const U p_scalar) const
 {
-    return Matrix3<T>(*this).Multiply(p_other);
+    return Matrix3<T>(*this).Multiply(p_scalar);
 }
 
 template<typename T>
 template<typename U>
-Matrix3<T>& Matrix3<T>::operator*=(const U p_other)
+Matrix3<T>& Matrix3<T>::operator*=(const U p_scalar)
 {
-    return  { Multiply(p_other) };
+    return  { Multiply(p_scalar) };
 }
 
 template<typename T>
@@ -439,16 +454,16 @@ template<typename U>
 
 template<typename T> 
 template<class U>
- constexpr Matrix3<T> Matrix3<T>::operator/(const U p_other) const
+ constexpr Matrix3<T> Matrix3<T>::operator/(const U p_scalar) const
 {
-     return Matrix3<T>(*this).Divide(p_other);
+     return Matrix3<T>(*this).Divide(p_scalar);
 }
 
 template<typename T> 
 template<class U>
- Matrix3<T>& Matrix3<T>::operator/=(const U p_other)
+ Matrix3<T>& Matrix3<T>::operator/=(const U p_scalar)
 {
-     return { Divide(p_other) };
+     return { Divide(p_scalar) };
 }
 
 
@@ -500,7 +515,8 @@ constexpr bool Matrix3<T>::AreEqual(const Matrix3<T>& p_left, const Matrix3<T>& 
     return p_left.Equals(p_right);
 }
 
-template<typename T> constexpr bool Matrix3<T>::IsIdentity(const Matrix3<T>& p_other)
+template<typename T>
+constexpr bool Matrix3<T>::IsIdentity(const Matrix3<T>& p_other)
 {
     return p_other.Equals(identity);
 }
@@ -520,5 +536,12 @@ constexpr bool Matrix3<T>::operator!=(const Matrix3<T>& p_other) const
 #pragma endregion
 
 #pragma region Outside Operators
+
+template<typename T>
+constexpr std::ostream& GPM::operator<<(std::ostream& p_stream, const Matrix3<T>& p_matrix3)
+{
+    p_stream << Matrix3<T>::ToString(p_matrix3);
+    return p_stream;
+}
 
 #pragma endregion

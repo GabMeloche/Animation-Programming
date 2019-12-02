@@ -69,6 +69,12 @@ constexpr Matrix4<T>::Matrix4(const T p_00, const T p_01, const T p_02, const T 
 #pragma region Properties
 
 template<typename T>
+constexpr bool Matrix4<T>::isIdentity()
+{
+    return Equals(identity);
+}
+
+template<typename T>
 constexpr T Matrix4<T>::Determinant()
 {
     return ((m_data[0] * GetMinor({ m_data[5], m_data[6], m_data[7], m_data[9], m_data[10], m_data[11], m_data[13], m_data[14], m_data[15] }))
@@ -78,9 +84,9 @@ constexpr T Matrix4<T>::Determinant()
 }
 
 template<typename T>
-constexpr T Matrix4<T>::Determinant(const Matrix4& p_matrix)
+constexpr T Matrix4<T>::Determinant(const Matrix4<T>& p_matrix)
 {
-    return p_matrix.Determinant();
+    return Matrix4<T>(p_matrix).Determinant();
 }
 
 template<typename T>
@@ -121,9 +127,9 @@ constexpr Matrix4<T>& Matrix4<T>::Normalize()
 {
     T det = Determinant();
 
-    for(unsigned int i = 0; i < 16; ++i)
+    for (auto& i : m_data)
     {
-        m_data[i] /= det;
+        i /= det;
     }
 
     return { *this };
@@ -140,9 +146,9 @@ template<typename T>
 template<typename U>
 constexpr Matrix4<T>& Matrix4<T>::Scale(const Vector3<U>& p_scale)
 {
-    this *= CreateScale(p_scale);
+    (*this) = CreateScale(p_scale);
 
-    return { *this };
+    return { (*this) };
 }
 
 template<typename T>
@@ -160,7 +166,7 @@ constexpr Matrix4<T> Matrix4<T>::CreateScale(const Vector3<U>& p_scale)
 template<typename T>
 constexpr Matrix4<T>& Matrix4<T>::Rotate(const Quaternion& p_rotation)
 {
-    this *= p_rotation.ToMatrix4();
+    (*this) *= p_rotation.ToMatrix4();
 
     return { *this };
 }
@@ -175,7 +181,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix4<T>& Matrix4<T>::Translate(const Vector3<U>& p_translate)
 {
-    this *= CreateTranslate(p_translate);
+    (*this) *= CreateTranslation(p_translate);
 
     return { *this };
 }
@@ -197,7 +203,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix4<T>& Matrix4<T>::Transform(const Vector3<U>& p_translate, const Quaternion& p_rotation, const Vector3<U>& p_scale)
 {
-    this *= CreateTransform(p_translate, p_rotation, p_scale);
+    (*this) *= CreateTransformation(p_translate, p_rotation, p_scale);
 
     return { *this };
 }
@@ -212,10 +218,65 @@ constexpr Matrix4<T> Matrix4<T>::CreateTransformation(const Vector3<U>& p_transl
 
     Matrix4<T> tmpMat = tmpTrans * tmpRot * tmpScale;
 
-    // tmpTrans *= tmpRot;
-    //tmpMat *= tmpScale;
+    return tmpMat;
+}
+
+template<typename T>
+constexpr Matrix4<T> Matrix4<T>::Adjugate()
+{
+    Matrix4<T> tmpMat(m_data);
+
+    tmpMat.m_data[0] =   GetMinor({ m_data[5], m_data[6], m_data[7], m_data[9], m_data[10], m_data[11], m_data[13], m_data[14], m_data[15] });
+    tmpMat.m_data[4] =  -GetMinor({ m_data[4], m_data[6], m_data[7], m_data[8], m_data[10], m_data[11], m_data[12], m_data[14], m_data[15] });
+    tmpMat.m_data[8] =   GetMinor({ m_data[4], m_data[5], m_data[7], m_data[8], m_data[9], m_data[11], m_data[12], m_data[13], m_data[15] });
+    tmpMat.m_data[12] = -GetMinor({ m_data[4], m_data[5], m_data[6], m_data[8], m_data[9], m_data[10], m_data[12], m_data[13], m_data[14] });
+    
+    tmpMat.m_data[1] =  -GetMinor({ m_data[1], m_data[2], m_data[3], m_data[9], m_data[10], m_data[11], m_data[13], m_data[14], m_data[15] });
+    tmpMat.m_data[5] =   GetMinor({ m_data[0], m_data[2], m_data[3], m_data[8], m_data[10], m_data[11], m_data[12], m_data[14], m_data[15] });
+    tmpMat.m_data[9] =  -GetMinor({ m_data[0], m_data[1], m_data[3], m_data[8], m_data[9], m_data[11], m_data[12], m_data[13], m_data[15] });
+    tmpMat.m_data[13] =  GetMinor({ m_data[0], m_data[1], m_data[2], m_data[8], m_data[9], m_data[10], m_data[12], m_data[13], m_data[14] });
+    
+    tmpMat.m_data[2] =   GetMinor({ m_data[1], m_data[2], m_data[3], m_data[5], m_data[6], m_data[7], m_data[13], m_data[14], m_data[15] });
+    tmpMat.m_data[6] =  -GetMinor({ m_data[0], m_data[2], m_data[3], m_data[4], m_data[6], m_data[7], m_data[12], m_data[14], m_data[15] });
+    tmpMat.m_data[10] =  GetMinor({ m_data[0], m_data[1], m_data[3], m_data[4], m_data[5], m_data[7], m_data[12], m_data[13], m_data[15] });
+    tmpMat.m_data[14] = -GetMinor({ m_data[0], m_data[1], m_data[2], m_data[4], m_data[5], m_data[6], m_data[12], m_data[13], m_data[14] });
+    
+    tmpMat.m_data[3] =  -GetMinor({ m_data[1], m_data[2], m_data[3], m_data[5], m_data[6], m_data[7], m_data[9], m_data[10], m_data[11] });
+    tmpMat.m_data[7] =   GetMinor({ m_data[0], m_data[2], m_data[3], m_data[4], m_data[6], m_data[7], m_data[8], m_data[10], m_data[11] });
+    tmpMat.m_data[11] = -GetMinor({ m_data[0], m_data[1], m_data[3], m_data[4], m_data[5], m_data[7], m_data[8], m_data[9], m_data[11] });
+    tmpMat.m_data[15] =  GetMinor({ m_data[0], m_data[1], m_data[2], m_data[4], m_data[5], m_data[6], m_data[8], m_data[9], m_data[10] });
+
+    return { tmpMat};
+}
+
+template<typename T>
+constexpr Matrix4<T> Matrix4<T>::CreateAdjugate(const Matrix4<T>& p_matrix)
+{
+    return Matrix4<T>(p_matrix).Adjugate();
+}
+
+
+template<typename T>
+constexpr Matrix4<T> Matrix4<T>::Inverse(const Matrix4<T>& p_matrix)
+{
+    static_assert(!std::is_integral<T>::value, "Matrix3::CreateTransformation : Can't do Transform Matrices with Matrix3<int>, as values would be rounded to 0");
+
+    Matrix4<T> tmpMat;
+    const Matrix4<T> Adj = CreateAdjugate(p_matrix);
+    const T Det = Determinant(p_matrix);
+
+    for (int i = 0; i < 16; ++i)
+    {
+        tmpMat.m_data[i] = Adj.m_data[i] / Det;
+    }
 
     return tmpMat;
+}
+
+template<typename T>
+Matrix4<T> Matrix4<T>::LookAt(const Vector3<T>& p_from, const Vector3<T>& p_to, const Vector3<T>& p_up)
+{
+    
 }
 
 
@@ -225,11 +286,10 @@ constexpr Matrix4<T> Matrix4<T>::CreateTransformation(const Vector3<U>& p_transl
 template<typename T>
 constexpr void Matrix4<T>::SetColumn(int p_column, const Vector4<T>& p_vector)
 {
-    int columnStart = p_column;
-    m_data[columnStart] = p_vector.x;
-    m_data[columnStart + 4] = p_vector.y;
-    m_data[columnStart + 8] = p_vector.z;
-    m_data[columnStart + 12] = p_vector.w;
+    m_data[p_column] = p_vector.x;
+    m_data[p_column + 4] = p_vector.y;
+    m_data[p_column + 8] = p_vector.z;
+    m_data[p_column + 12] = p_vector.w;
 }
 
 template<typename T>
@@ -250,16 +310,10 @@ T Matrix4<T>::GetMinor(Matrix3<T> p_minor)
           + (p_minor.m_data[2] * ((p_minor.m_data[3] * p_minor.m_data[7]) - (p_minor.m_data[4] * p_minor.m_data[6]))));
 }
 
-template<typename T>
-Matrix4<T> Matrix4<T>::Inverse()
-{
-    //TODO need determinant to complete
-}
-
 #pragma region Conversions
 
 template<typename T>
-constexpr std::string Matrix4<T>::ToString() noexcept
+constexpr std::string Matrix4<T>::ToString() const noexcept
 {
     std::stringstream StringStream;
     StringStream << '[' << m_data[0] << "  " << m_data[1] << "  " << m_data[2] << "  " << m_data[3] << "]\n"
@@ -309,7 +363,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix4<T> Matrix4<T>::operator+(const Matrix4<U>& p_other) const
 {
-    return Add(this, p_other);
+    return Add(*this, p_other);
 }
 
 template<typename T>
@@ -346,7 +400,7 @@ template<typename T>
 template<typename U>
 constexpr Matrix4<T> Matrix4<T>::operator-(const Matrix4<U>& p_other) const
 {
-    return Subtract(this, p_other);
+    return Subtract(*this, p_other);
 }
 
 template<typename T>
@@ -487,20 +541,21 @@ Vector4<T> Matrix4<T>::Multiply(const Matrix4<U>& p_matrix, const Vector4<T>& p_
 }
 
 template<typename T>
-bool Matrix4<T>::Equals(const Matrix4<T>& p_matrix, const Matrix4<T>& p_other)
+bool Matrix4<T>::Equals(const Matrix4<T>& p_other)
 {
     for (int i = 0; i < 16; i++)
     {
-        if (p_matrix.m_data[i] != p_other.m_data[i])
+        if (m_data[i] != p_other.m_data[i])
             return false;
     }
     return true;
 }
 
 template<typename T>
-void Matrix4<T>::Set(Matrix4<T>& p_matrix, const Matrix4<T>& p_other)
+template<typename U>
+void Matrix4<T>::Set(Matrix4<T>& p_matrix, const Matrix4<U>& p_other)
 {
-    memcpy(p_matrix.m_data, p_other.m_data, sizeof(T) * 16);
+    memcpy(p_matrix.m_data, p_other.m_data, sizeof(U) * 16);
 }
 
 #pragma endregion 
@@ -518,19 +573,40 @@ Vector4<T> Matrix4<T>::operator*(const Vector4<T>& p_vector)
 template<typename T>
 bool Matrix4<T>::operator==(const Matrix4<T>& p_matrix)
 {
-    return Equals(*this, p_matrix);
+    return Equals(p_matrix);
 }
 
 template<typename T>
 bool Matrix4<T>::operator!=(const Matrix4<T>& p_matrix)
 {
-    return !Equals(*this, p_matrix);
+    return !Equals(p_matrix);
 }
 
 template<typename T>
-void Matrix4<T>::operator=(const Matrix4<T>& p_matrix)
+Matrix4<T>& Matrix4<T>::operator=(const Matrix4<T>& p_matrix)
 {
-    Set(*this, p_matrix);
+	Set(*this, p_matrix);
+
+	return { (*this) };
+}
+
+template<typename T>
+template<typename U>
+Matrix4<T>& Matrix4<T>::operator=(const Matrix4<U>& p_matrix)
+{
+	Set(*this, p_matrix);
+
+	return { (*this) };
+}
+
+template <typename T>
+constexpr std::ostream& GPM::operator<<(std::ostream& p_os, const Matrix4<T>& p_vector)
+{
+	p_os << '[' << p_vector.m_data[0] << "  " << p_vector.m_data[1] << "  " << p_vector.m_data[2] << "  " << p_vector.m_data[3] << "]\n"
+		<< '[' << p_vector.m_data[4] << "  " << p_vector.m_data[5] << "  " << p_vector.m_data[6] << "  " << p_vector.m_data[7] << "]\n"
+		<< '[' << p_vector.m_data[8] << "  " << p_vector.m_data[9] << "  " << p_vector.m_data[10] << "  " << p_vector.m_data[11] << "]\n"
+		<< '[' << p_vector.m_data[12] << "  " << p_vector.m_data[13] << "  " << p_vector.m_data[14] << "  " << p_vector.m_data[15] << "]\n";
+	return p_os;
 }
 
 template<typename T>
