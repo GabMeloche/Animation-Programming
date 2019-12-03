@@ -8,16 +8,18 @@
 class Skeleton
 {
 public:
-	Skeleton(const char* p_anim);
+	Skeleton();
 	~Skeleton() = default;
 
 	inline std::vector<Bone>& GetBones() { return m_bones; }
 	inline void AddBone(Bone& p_bone) { m_bones.emplace_back(p_bone); }
 	
 	void DrawSkeleton();
-	void UpdateSkeleton();
-	void UpdateBones(Bone* p_bone);
+	void ComputeSkeleton();
+	void CalculateBoneInverses();
+	void ComputeBones(Bone* p_bone);
 	void PrintSkeleton();
+	void Animate(const char* p_anim, int p_frame);
 	
 private:
 	std::vector<Bone> m_bones;

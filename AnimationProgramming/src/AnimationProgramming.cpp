@@ -14,20 +14,19 @@ class CSimulation : public ISimulation
 	
 	virtual void Init() override
 	{
-		skeleton = new Skeleton("ThirdPersonWalk.anim");
+		skeleton = new Skeleton();
 		
 		int spine01 =	GetSkeletonBoneIndex("spine_01");
 		int spineParent = GetSkeletonBoneParentIndex(spine01);
-		const char* spineParentName = GetSkeletonBoneName(spineParent);
-		
-		skeleton->PrintSkeleton();
+		const char* spineParentName = GetSkeletonBoneName(spineParent);		
 	}
 
 	
 	virtual void Update(float frameTime) override
 	{
+		m_timer += frameTime * 10;
+		skeleton->Animate("ThirdPersonWalk.anim", static_cast<int>(m_timer) % GetAnimKeyCount("ThirdPersonWalk.anim"));
 
-		
 		// X axis
 		DrawLine(0, 0, 0, 100, 0, 0, 1, 0, 0);
 
@@ -38,6 +37,7 @@ class CSimulation : public ISimulation
 		DrawLine(0, 0, 0, 0, 0, 100, 0, 0, 1);
 
 		skeleton->DrawSkeleton();
+		
 	}
 };
 

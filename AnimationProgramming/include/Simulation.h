@@ -10,6 +10,8 @@ public:
 
 	virtual void Init() {}
 	virtual void Update( float frameTime ){}
+
+	float m_timer = 0.0f;
 };
 
 
