@@ -18,7 +18,9 @@ class CSimulation : public ISimulation
 		
 		int spine01 =	GetSkeletonBoneIndex("spine_01");
 		int spineParent = GetSkeletonBoneParentIndex(spine01);
-		const char* spineParentName = GetSkeletonBoneName(spineParent);		
+		const char* spineParentName = GetSkeletonBoneName(spineParent);
+		std::cout << "NUMBER OF BONES: " << skeleton->GetBones().size();
+		//skeleton->Animate("ThirdPersonWalk.anim", static_cast<int>(m_timer) % GetAnimKeyCount("ThirdPersonWalk.anim"));
 	}
 
 	
@@ -36,7 +38,8 @@ class CSimulation : public ISimulation
 		// Z axis
 		DrawLine(0, 0, 0, 0, 0, 100, 0, 0, 1);
 
-		skeleton->DrawSkeleton();
+		skeleton->DrawSkeleton({0, 1, 1});
+		skeleton->DrawTPose({1, 0, 1});
 		
 	}
 };

@@ -8,6 +8,8 @@ public:
 	Bone(const GPM::Vector3<float>& p_pos, const GPM::Quaternion& p_quat)
 	{
 		m_localTransform = GPM::Matrix4<float>::CreateTransformation(p_pos, p_quat, { 1, 1, 1 });
+		m_localTPose = m_localTransform;
+		m_FinalMat = GPM::Matrix4<float>::identity;
 	}
 	
 	~Bone() = default;
@@ -27,21 +29,26 @@ public:
 	inline GPM::Matrix4<float>& GetWorldTransform() { return m_worldTransform; }
 	inline void SetWorldTransform(const GPM::Matrix4<float>& p_other) { m_worldTransform = p_other; }
 
+	inline GPM::Matrix4<float>& GetLocalTPose() { return m_localTPose; }
+	inline void SetLocalTPose(const GPM::Matrix4<float>& p_other) { m_localTPose = p_other; }
+	
 	inline GPM::Matrix4<float>& GetWorldTPose() { return m_WorldTPose; }
-	inline void SetWorldInverted(const GPM::Matrix4<float>& p_other) { m_WorldTPose = p_other; }
+	inline void SetWorldTPose(const GPM::Matrix4<float>& p_other) { m_WorldTPose = p_other; }
 
 	void CalculateInverted()
 	{
 		m_WorldTPose =  m_localTransform;
 	}
+	GPM::Matrix4<float> m_FinalMat;
 	
 private:
 	Bone* m_parent = nullptr;
-	std::vector<Bone*> m_children;
 	std::string m_name;
+	std::vector<Bone*> m_children;
 
-	
 	GPM::Matrix4<float> m_localTransform;
 	GPM::Matrix4<float> m_worldTransform;
+	GPM::Matrix4<float> m_localTPose;
 	GPM::Matrix4<float> m_WorldTPose;
+	
 };

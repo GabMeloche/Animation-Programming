@@ -464,7 +464,7 @@ constexpr Matrix4<T> Matrix4<T>::Multiply(const Matrix4<T>& p_left, const Matrix
 
 template<typename T>
 template<typename U>
-Vector4<U>& Matrix4<T>::Multiply(const Vector4<U>& p_other)
+Vector4<U> Matrix4<T>::Multiply(const Vector4<U>& p_other)
 {
     Vector4<T> tmpVec = Vector4F::zero;
 
@@ -541,7 +541,7 @@ Vector4<T> Matrix4<T>::Multiply(const Matrix4<U>& p_matrix, const Vector4<T>& p_
 }
 
 template<typename T>
-bool Matrix4<T>::Equals(const Matrix4<T>& p_other)
+bool Matrix4<T>::Equals(const Matrix4<T>& p_other) const
 {
     for (int i = 0; i < 16; i++)
     {
@@ -571,13 +571,13 @@ Vector4<T> Matrix4<T>::operator*(const Vector4<T>& p_vector)
 }
 
 template<typename T>
-bool Matrix4<T>::operator==(const Matrix4<T>& p_matrix)
+bool Matrix4<T>::operator==(const Matrix4<T>& p_matrix) const
 {
     return Equals(p_matrix);
 }
 
 template<typename T>
-bool Matrix4<T>::operator!=(const Matrix4<T>& p_matrix)
+bool Matrix4<T>::operator!=(const Matrix4<T>& p_matrix) const
 {
     return !Equals(p_matrix);
 }

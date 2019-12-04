@@ -14,7 +14,8 @@ public:
 	inline std::vector<Bone>& GetBones() { return m_bones; }
 	inline void AddBone(Bone& p_bone) { m_bones.emplace_back(p_bone); }
 	
-	void DrawSkeleton();
+	void DrawSkeleton(const GPM::Vector3F& p_color);
+	void DrawTPose(const GPM::Vector3F& p_color);
 	void ComputeSkeleton();
 	void CalculateBoneInverses();
 	void ComputeBones(Bone* p_bone);
