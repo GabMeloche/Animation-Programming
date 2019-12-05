@@ -1,4 +1,4 @@
-#include <Engine.h>
+#include <Engine/Engine.h>
 #include <Skeleton/Skeleton.h>
 
 Skeleton::Skeleton()
@@ -123,8 +123,7 @@ void Skeleton::PrintSkeleton()
 }
 
 void Skeleton::Animate(int p_animationIndex, float p_frame)
-{
-	
+{	
 	int frame1 = static_cast<int>(p_frame) % m_animations[p_animationIndex].GetAnimSkeletons().size();
 	int frame2 = frame1 + 1;
 	int timer = static_cast<int>(p_frame);

@@ -1,9 +1,10 @@
 // AnimationProgramming.cpp : Defines the entry point for the console application.
 //
 
-#include <Engine.h>
-#include <Simulation.h>
+#include <Engine/Engine.h>
+#include <Engine/Simulation.h>
 #include <Skeleton/Skeleton.h>
+#include <Engine/InputManager.h>
 #include "Windows.h"
 
 
@@ -11,11 +12,12 @@ class CSimulation : public ISimulation
 {
 public:
 	Skeleton* skeleton = nullptr;
+	InputManager inputManager;
 	
 	virtual void Init() override
 	{
 		skeleton = new Skeleton();
-		
+		//inputManager = new InputManager();
 		int spine01 = GetSkeletonBoneIndex("spine_01");
 		int spineParent = GetSkeletonBoneParentIndex(spine01);
 		const char* spineParentName = GetSkeletonBoneName(spineParent);
@@ -27,14 +29,11 @@ public:
 
 	
 	virtual void Update(float frameTime) override
-	{
-		static int animation = -1;
-		static bool drawSkeleton = false;
-		static bool drawTPose = false;
-		
+	{		
 		m_timer += frameTime * 20;
 
-		skeleton->Animate(animation, m_timer);
+		inputManager.ProcessInputs();
+		skeleton->Animate(inputManager.GetAnimationIndex(), m_timer);
 		
 		// X axis
 		DrawLine(0, 0, 0, 100, 0, 0, 1, 0, 0);
@@ -46,28 +45,12 @@ public:
 		DrawLine(0, 0, 0, 0, 0, 100, 0, 0, 1);
 
 
-		if (drawSkeleton)
+		if (inputManager.GetDrawSkeleton())
 			skeleton->DrawSkeleton({0, 1, 1});
 
-		if (drawTPose)
+		if (inputManager.GetDrawTPose())
 			skeleton->DrawTPose({1, 0, 1});
 
-		if (GetAsyncKeyState('F') & 0x1)
-		{
-			++animation;
-			if (animation >= skeleton->GetAnimations().size())
-				animation = -1;
-		}
-		
-		if (GetAsyncKeyState('Z') & 0x1)
-		{
-			drawSkeleton = !drawSkeleton;
-		}
-		
-		if (GetAsyncKeyState('X') & 0x1)
-		{
-			drawTPose = !drawTPose;
-		}
 	}
 };
 

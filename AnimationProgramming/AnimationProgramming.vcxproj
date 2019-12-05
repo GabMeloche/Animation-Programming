@@ -181,13 +181,15 @@
     <ClInclude Include="include\Animation\AnimBone.h" />
     <ClInclude Include="include\Animation\AnimSkeleton.h" />
     <ClInclude Include="include\Skeleton\Bone.h" />
-    <ClInclude Include="include\Engine.h" />
-    <ClInclude Include="include\Simulation.h" />
+    <ClInclude Include="include\Engine\Engine.h" />
+    <ClInclude Include="include\Engine\Simulation.h" />
     <ClInclude Include="include\Skeleton\Skeleton.h" />
     <ClInclude Include="include\stdafx.h" />
     <ClInclude Include="include\targetver.h" />
+    <ClInclude Include="include\Engine\InputManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Engine\InputManager.cpp" />
     <ClCompile Include="src\Animation\Animation.cpp" />
     <ClCompile Include="src\AnimationProgramming.cpp" />
     <ClCompile Include="src\Skeleton\Skeleton.cpp" />
