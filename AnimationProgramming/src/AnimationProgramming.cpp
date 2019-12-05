@@ -20,14 +20,16 @@ class CSimulation : public ISimulation
 		int spineParent = GetSkeletonBoneParentIndex(spine01);
 		const char* spineParentName = GetSkeletonBoneName(spineParent);
 		std::cout << "NUMBER OF BONES: " << skeleton->GetBones().size();
-		//skeleton->Animate("ThirdPersonWalk.anim", static_cast<int>(m_timer) % GetAnimKeyCount("ThirdPersonWalk.anim"));
+
+		skeleton->AddAnimation("ThirdPersonWalk.anim", "Walk");
+		skeleton->AddAnimation("ThirdPersonRun.anim", "Run");
 	}
 
 	
 	virtual void Update(float frameTime) override
 	{
 		m_timer += frameTime * 10;
-		skeleton->Animate("ThirdPersonWalk.anim", static_cast<int>(m_timer) % GetAnimKeyCount("ThirdPersonWalk.anim"));
+		skeleton->Animate(0, static_cast<int>(m_timer) % GetAnimKeyCount("ThirdPersonWalk.anim"));
 
 		// X axis
 		DrawLine(0, 0, 0, 100, 0, 0, 1, 0, 0);
@@ -39,8 +41,7 @@ class CSimulation : public ISimulation
 		DrawLine(0, 0, 0, 0, 0, 100, 0, 0, 1);
 
 		skeleton->DrawSkeleton({0, 1, 1});
-		skeleton->DrawTPose({1, 0, 1});
-		
+		skeleton->DrawTPose({1, 0, 1});	
 	}
 };
 

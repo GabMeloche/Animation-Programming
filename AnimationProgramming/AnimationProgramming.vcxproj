@@ -177,6 +177,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Animation.h" />
     <ClInclude Include="include\Bone.h" />
     <ClInclude Include="include\Engine.h" />
     <ClInclude Include="include\Simulation.h" />
@@ -186,6 +187,7 @@
     <ClInclude Include="include\Transform.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Animation.cpp" />
     <ClCompile Include="src\AnimationProgramming.cpp" />
     <ClCompile Include="src\Skeleton.cpp" />
     <ClCompile Include="src\stdafx.cpp" />

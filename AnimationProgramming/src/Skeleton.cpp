@@ -1,6 +1,5 @@
-#include "Skeleton.h"
 #include "Engine.h"
-#include <stdio.h>
+#include "Skeleton.h"
 
 Skeleton::Skeleton()
 {
@@ -10,10 +9,6 @@ Skeleton::Skeleton()
 	{
 		float posX, posY, posZ, quatW, quatX, quatY, quatZ;
 		GetSkeletonBoneLocalBindTransform(i, posX, posY, posZ, quatW, quatX, quatY, quatZ);
-
-		printf("\nparent bone : %s\n", GetSkeletonBoneName(i));
-		printf("Anim key count : %ld\n", 0);
-		printf("Anim key : pos(%.2f,%.2f,%.2f) rotation quat(%.10f,%.10f,%.10f,%.10f)\n", posX, posY, posZ, quatW, quatX, quatY, quatZ);
 		
 		m_bones.emplace_back(GPM::Vector3<float>{posX, posY, posZ}, GPM::Quaternion{ quatX, quatY, quatZ, quatW });
 		m_bones[i].SetName(GetSkeletonBoneName(i));
@@ -34,11 +29,11 @@ Skeleton::Skeleton()
 		else
 		{
 			m_bones[i].SetWorldTransform(m_bones[i].GetLocalTransform());
+			m_bones[i].SetWorldTPose(m_bones[i].GetLocalTransform());
 		}
 	}
 	
 	ComputeSkeleton();
-	CalculateBoneInverses();
 }
 
 void Skeleton::DrawSkeleton(const GPM::Vector3F& p_color)
@@ -84,12 +79,6 @@ void Skeleton::ComputeSkeleton()
 	ComputeBones(m_root);
 }
 
-void Skeleton::CalculateBoneInverses()
-{
-	for (auto& bone : m_bones)
-		bone.CalculateInverted();
-}
-
 void Skeleton::ComputeBones(Bone* p_bone)
 {
 	if (p_bone == nullptr)
@@ -101,11 +90,12 @@ void Skeleton::ComputeBones(Bone* p_bone)
 		Matrix4<float> worldTPos = p_bone->GetParent()->GetWorldTPose() * p_bone->GetLocalTPose();
 
 		//TODO
-		//p_bone->SetWorldTransform(newTrans);
+		p_bone->SetWorldTransform(worldTPos);
 		p_bone->SetWorldTPose(worldTPos);
 	}
 	else
 	{
+		p_bone->SetWorldTransform(p_bone->GetLocalTransform());
 		p_bone->SetWorldTPose(p_bone->GetLocalTPose());
 	}
 	
@@ -132,7 +122,7 @@ void Skeleton::PrintSkeleton()
 	std::cout << "\n\n----END PRINT SKELETON----\n\n";
 }
 
-void Skeleton::Animate(const char* p_anim, int p_frame)
+void Skeleton::Animate(int p_animationIndex, int p_frame)
 {
 	float posX, posY, posZ, quatW, quatX, quatY, quatZ;
 
@@ -140,15 +130,7 @@ void Skeleton::Animate(const char* p_anim, int p_frame)
 	
 	for (int i = 0; i < m_bones.size(); ++i)
 	{
-		GetAnimLocalBoneTransform(p_anim, i, p_frame, posX, posY, posZ, quatW, quatX, quatY, quatZ);
-		
-		GPM::Matrix4<float> anim = GPM::Matrix4<float>::CreateTransformation(
-			GPM::Vector3<float>{posX, posY, posZ}, 
-			GPM::Quaternion{ quatX, quatY, quatZ, quatW },
-			{1, 1, 1});
-
-		
-		m_bones[i].SetWorldTransform(m_bones[i].GetLocalTPose() * anim);
+		m_bones[i].SetWorldTransform(m_animations[p_animationIndex].GetSkeletons()[p_frame].GetBones()[i].GetLocalTransform());
 
 		if (m_bones[i].GetParent())
 			m_bones[i].m_FinalMat = m_bones[i].GetParent()->m_FinalMat * m_bones[i].GetWorldTransform();
@@ -159,17 +141,18 @@ void Skeleton::Animate(const char* p_anim, int p_frame)
 		
 		int matrixIndex = 0;
 
-		/*for (int j = i * 16; j < 16 + (i * 16); ++j)
+		for (int j = i * 16; j < 16 + (i * 16); ++j)
 		{
 			matrices[j] = patate[matrixIndex];
 			++matrixIndex;
-		}*/
-		for (int j = 0; j < 16; ++j)
-		{
-			matrices[(i * 16) + j] = patate[j];
 		}
 	}
 	
 	SetSkinningPose(matrices, m_bones.size());
+}
+
+void Skeleton::AddAnimation(const char* p_anim, const char* p_name)
+{
+	m_animations.emplace_back(Animation{ p_anim, p_name });
 }
 

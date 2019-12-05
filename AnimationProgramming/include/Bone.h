@@ -34,11 +34,7 @@ public:
 	
 	inline GPM::Matrix4<float>& GetWorldTPose() { return m_WorldTPose; }
 	inline void SetWorldTPose(const GPM::Matrix4<float>& p_other) { m_WorldTPose = p_other; }
-
-	void CalculateInverted()
-	{
-		m_WorldTPose =  m_localTransform;
-	}
+	
 	GPM::Matrix4<float> m_FinalMat;
 	
 private:
