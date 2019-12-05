@@ -56,7 +56,7 @@ namespace GPM::Tools
 	inline T Utils::GetDecimalPart(const T p_value)
 	{
 		static_assert(std::is_arithmetic<T>::value, "Sign function should only be used with arithmetic types");
-		return mod(p_value, T(1.0));
+		return std::fmod(p_value, T(1.0));
 	}
 
 	inline double Utils::Sin(const double p_value)

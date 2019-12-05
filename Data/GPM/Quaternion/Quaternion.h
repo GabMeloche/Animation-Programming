@@ -326,7 +326,16 @@ namespace GPM
 		 */
 		static Quaternion Slerp(const Quaternion& p_start, const Quaternion& p_end, const double p_alpha);
 
-		/**
+        /**
+         * @brief Smoothly interpolate between two quaternions and use the shortest path to it. Prevents wrong side rotation.
+         * @param p_start Start quaternion
+         * @param p_end End quaternion
+         * @param p_alpha Coefficient
+         * @return The quaternion
+         */
+	    static Quaternion SlerpShortestPath(const Quaternion& p_start, const Quaternion& p_end, double p_alpha);
+
+        /**
 		 * @brief Normalized interpolate between two quaternions
 		 * @param p_start Start quaternion
 		 * @param p_end End quaternion

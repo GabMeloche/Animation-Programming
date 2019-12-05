@@ -258,7 +258,7 @@ namespace GPM
         template<typename U>
         Matrix4<T>& operator=(const Matrix4<U>& p_matrix);
     	
-        T operator[](int p_position);
+        T operator[](int p_position) const;
 
 #pragma endregion
 

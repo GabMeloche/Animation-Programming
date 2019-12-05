@@ -1,5 +1,5 @@
-#include "Engine.h"
-#include "Skeleton.h"
+#include <Engine.h>
+#include <Skeleton/Skeleton.h>
 
 Skeleton::Skeleton()
 {
@@ -99,7 +99,7 @@ void Skeleton::ComputeBones(Bone* p_bone)
 		p_bone->SetWorldTPose(p_bone->GetLocalTPose());
 	}
 	
-	for (int i = 0; i < p_bone->GetChildren().size(); ++i)
+	for (size_t i = 0; i < p_bone->GetChildren().size(); ++i)
 	{
 		ComputeBones(p_bone->GetChildren()[i]);
 	}
@@ -122,16 +122,42 @@ void Skeleton::PrintSkeleton()
 	std::cout << "\n\n----END PRINT SKELETON----\n\n";
 }
 
-void Skeleton::Animate(int p_animationIndex, int p_frame)
+void Skeleton::Animate(int p_animationIndex, float p_frame)
 {
+	
+	int frame1 = static_cast<int>(p_frame) % m_animations[p_animationIndex].GetAnimSkeletons().size();
+	int frame2 = frame1 + 1;
+	int timer = static_cast<int>(p_frame);
+	
+	if (frame2 >= m_animations[p_animationIndex].GetAnimSkeletons().size())
+	{
+		frame2 = 0;
+	}
+
 	float posX, posY, posZ, quatW, quatX, quatY, quatZ;
 
 	float matrices[976];
 	
-	for (int i = 0; i < m_bones.size(); ++i)
+	for (size_t i = 0; i < m_bones.size(); ++i)
 	{
-		m_bones[i].SetWorldTransform(m_animations[p_animationIndex].GetSkeletons()[p_frame].GetBones()[i].GetLocalTransform());
+		if (p_animationIndex >= 0)
+		{
+			Vector3F pos1 = m_animations[p_animationIndex].GetAnimSkeletons()[frame1].m_animBones[i].m_position;
+			Vector3F pos2 = m_animations[p_animationIndex].GetAnimSkeletons()[frame2].m_animBones[i].m_position;
 
+			Quaternion quat1 = m_animations[p_animationIndex].GetAnimSkeletons()[frame1].m_animBones[i].m_quaternion;
+			Quaternion quat2 = m_animations[p_animationIndex].GetAnimSkeletons()[frame2].m_animBones[i].m_quaternion;
+
+			Vector3F posFinal = GPM::Vector3F::Lerp(pos1, pos2, p_frame - timer);
+			Quaternion quatFinal = GPM::Quaternion::SlerpShortestPath(quat1, quat2, p_frame - timer);
+
+			GPM::Matrix4F anim = GPM::Matrix4F::CreateTransformation(posFinal, quatFinal, { 1, 1, 1 });
+
+			m_bones[i].SetWorldTransform(m_bones[i].GetLocalTPose() * anim);
+		}
+		else
+			m_bones[i].SetWorldTransform(m_bones[i].GetLocalTPose());
+		
 		if (m_bones[i].GetParent())
 			m_bones[i].m_FinalMat = m_bones[i].GetParent()->m_FinalMat * m_bones[i].GetWorldTransform();
 		else

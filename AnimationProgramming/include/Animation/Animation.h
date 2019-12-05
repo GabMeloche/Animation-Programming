@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-
+#include <Animation/AnimSkeleton.h>
 
 class Skeleton;
 
@@ -10,9 +10,9 @@ public:
 	Animation(const char* p_anim, const char* p_name);
 	~Animation() = default;
 
-	inline std::vector<Skeleton>& GetSkeletons() { return m_skeletons; }
+	inline std::vector<AnimSkeleton>& GetAnimSkeletons() { return m_animSkeletons; }
 
 private:
-	std::vector<Skeleton> m_skeletons;
+	std::vector<AnimSkeleton> m_animSkeletons;
 	std::string m_name;
 };

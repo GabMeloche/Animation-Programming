@@ -43,7 +43,8 @@ void main(void)
 		(boneWeights[0] * (pos * skin.mat[boneIndex1]))
 		+ (boneWeights[1] * (pos * skin.mat[boneIndex2]))
 		+ (boneWeights[2] * (pos * skin.mat[boneIndex3]))
-		+ (boneWeights[3] * (pos * skin.mat[boneIndex4])));
+		+ (boneWeights[3] * (pos * skin.mat[boneIndex4]))
+		+ vec4(0, 50, 0, 0));
 
 
 	gl_Position = sm.projectionMatrix * (modelViewMatrix * vec4(animPos.xyz, 1.0f));

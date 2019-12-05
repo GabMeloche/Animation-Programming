@@ -610,7 +610,7 @@ constexpr std::ostream& GPM::operator<<(std::ostream& p_os, const Matrix4<T>& p_
 }
 
 template<typename T>
-T Matrix4<T>::operator[](int p_position)
+T Matrix4<T>::operator[](int p_position) const
 {
     return m_data[p_position];
 }
