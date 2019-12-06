@@ -5,35 +5,34 @@
 #include <Engine/Simulation.h>
 #include <Skeleton/Skeleton.h>
 #include <Engine/InputManager.h>
+#include <Engine/RenderingInfo.h>
+#include <memory>
 #include "Windows.h"
 
 
 class CSimulation : public ISimulation
 {
-public:
-	Skeleton* skeleton = nullptr;
-	InputManager inputManager;
+private:
+	std::unique_ptr<Skeleton> m_skeleton = nullptr;
+	RenderingInfo m_renderingInfo;
 	
+public:
 	virtual void Init() override
 	{
-		skeleton = new Skeleton();
-		//inputManager = new InputManager();
-		int spine01 = GetSkeletonBoneIndex("spine_01");
-		int spineParent = GetSkeletonBoneParentIndex(spine01);
-		const char* spineParentName = GetSkeletonBoneName(spineParent);
-		std::cout << "NUMBER OF BONES: " << skeleton->GetBones().size();
+		m_skeleton = std::make_unique<Skeleton>();
 
-		skeleton->AddAnimation("ThirdPersonWalk.anim", "Walk");
-		skeleton->AddAnimation("ThirdPersonRun.anim", "Run");
+		m_skeleton->AddAnimation("ThirdPersonWalk.anim", "Walk");
+		m_skeleton->AddAnimation("ThirdPersonRun.anim", "Run");
 	}
 
 	
 	virtual void Update(float frameTime) override
 	{		
-		m_timer += frameTime * 20;
+		m_timer += frameTime;
 
-		inputManager.ProcessInputs();
-		skeleton->Animate(inputManager.GetAnimationIndex(), m_timer);
+		InputManager::ProcessInputs(m_renderingInfo);
+
+		m_skeleton->Animate(m_renderingInfo.m_animationIndex, m_timer, m_renderingInfo.m_animSpeed);
 		
 		// X axis
 		DrawLine(0, 0, 0, 100, 0, 0, 1, 0, 0);
@@ -45,11 +44,11 @@ public:
 		DrawLine(0, 0, 0, 0, 0, 100, 0, 0, 1);
 
 
-		if (inputManager.GetDrawSkeleton())
-			skeleton->DrawSkeleton({0, 1, 1});
+		if (m_renderingInfo.m_drawSkeleton)
+			m_skeleton->DrawSkeleton({0, 1, 1});
 
-		if (inputManager.GetDrawTPose())
-			skeleton->DrawTPose({1, 0, 1});
+		if (m_renderingInfo.m_drawTPose)
+			m_skeleton->DrawTPose({1, 0, 1});
 
 	}
 };
@@ -59,7 +58,6 @@ int main()
 	CSimulation simulation;
 	Run(&simulation, 1400, 800);
 
-	delete simulation.skeleton;
     return 0;
 }
 

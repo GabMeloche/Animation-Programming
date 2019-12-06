@@ -22,6 +22,4 @@ Animation::Animation(const char* p_anim, const char* p_name): m_name { p_name }
 			m_animSkeletons[k].m_animBones[i].m_quaternion = { quatX, quatY, quatZ, quatW };
 		}
 	}
-
-	std::cout << "Animation nb of skeletons: " << m_animSkeletons.size() << std::endl;
 }

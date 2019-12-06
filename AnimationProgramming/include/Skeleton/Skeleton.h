@@ -16,13 +16,14 @@ public:
 	void ComputeSkeleton();
 	void ComputeBones(Bone* p_bone);
 	void PrintSkeleton();
-	void Animate(int p_animationIndex, float p_frame);
+	void Animate(int p_animationIndex, float p_time, float p_animSpeed);
 
 	std::vector<Animation>& GetAnimations() { return m_animations; }
 	void AddAnimation(const char* p_anim, const char* p_name);
 	
 	inline std::vector<Bone>& GetBones() { return m_bones; }
 	inline void AddBone(Bone& p_bone) { m_bones.emplace_back(p_bone); }
+	
 private:
 	std::vector<Animation> m_animations;
 	std::vector<Bone> m_bones;

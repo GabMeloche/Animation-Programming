@@ -180,6 +180,7 @@
     <ClInclude Include="include\Animation\Animation.h" />
     <ClInclude Include="include\Animation\AnimBone.h" />
     <ClInclude Include="include\Animation\AnimSkeleton.h" />
+    <ClInclude Include="include\Engine\RenderingInfo.h" />
     <ClInclude Include="include\Skeleton\Bone.h" />
     <ClInclude Include="include\Engine\Engine.h" />
     <ClInclude Include="include\Engine\Simulation.h" />

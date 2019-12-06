@@ -1,11 +1,20 @@
 Controls:
 
-WASD: movement
+	WASD: movement
 
-Hold Left Mouse Button: Move camera using mouse movement
+	Hold Left Mouse Button: Move camera using mouse movement
 
-F: Switch between the 2 animations
+	F: Switch between 3 animation states: T-pose, walking, runninga
 
-Z: Draw Skeleton
+	Z: Draw Skeleton
 
-X: Draw TPose
+	X: Draw TPose
+
+	Up Arrow: accelerate animation speed
+
+	Down Arrow: decelerate animation speed
+
+Notes:
+
+	- Mesh has been translated slightly backwards from its actual position in the vertex shader to make it easier to see the skeleton.
+	

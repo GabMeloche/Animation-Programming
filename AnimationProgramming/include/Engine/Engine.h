@@ -10,7 +10,7 @@
 
 ENGINE_API void			Run( class ISimulation* pSimulation, unsigned int width, unsigned int height );
 
-// Array of matrices (matrices = 16 floats) sent to GPU (in the same order than bones are ordered in skeleton)
+// Array of matrices (matrices = 16 floats) sent to GPU (in the same order than bones are ordered in m_skeleton)
 ENGINE_API void			SetSkinningPose( const float* boneMatrices, size_t boneCount );
 
 ENGINE_API size_t		GetSkeletonBoneCount();

@@ -11,8 +11,8 @@ public:
 	~Animation() = default;
 
 	inline std::vector<AnimSkeleton>& GetAnimSkeletons() { return m_animSkeletons; }
-
+	
 private:
-	std::vector<AnimSkeleton> m_animSkeletons;
 	std::string m_name;
+	std::vector<AnimSkeleton> m_animSkeletons;
 };

@@ -5,6 +5,7 @@ Skeleton::Skeleton()
 {
 	const int boneCount = GetSkeletonBoneCount();
 
+	//Create Bones
 	for (int i = 0; i < boneCount - 7; ++i)
 	{
 		float posX, posY, posZ, quatW, quatX, quatY, quatZ;
@@ -12,14 +13,14 @@ Skeleton::Skeleton()
 		
 		m_bones.emplace_back(GPM::Vector3<float>{posX, posY, posZ}, GPM::Quaternion{ quatX, quatY, quatZ, quatW });
 		m_bones[i].SetName(GetSkeletonBoneName(i));
-
 	}
 
 	m_root = &m_bones[0];
 
+	//Set parent-child links
 	for (int i = 0; i < boneCount - 7; ++i)
 	{
-		int parent = GetSkeletonBoneParentIndex(i);
+		const int parent = GetSkeletonBoneParentIndex(i);
 
 		if (parent != -1)
 		{
@@ -32,24 +33,24 @@ Skeleton::Skeleton()
 			m_bones[i].SetWorldTPose(m_bones[i].GetLocalTransform());
 		}
 	}
-	
+
+	//Compute world transforms
 	ComputeSkeleton();
 }
 
 void Skeleton::DrawSkeleton(const GPM::Vector3F& p_color)
 {
-	const float lineSizeMultiplier = 1.0f;
-	
 	for (auto& bone: m_bones)
 	{
-		GPM::Matrix4<float>& boneWorld = bone.m_FinalMat;
+		GPM::Matrix4<float>& boneWorld = bone.GetWorldTransform();
 		
 		if (bone.GetParent() != nullptr)
 		{
-			GPM::Matrix4<float>& parentWorld = bone.GetParent()->m_FinalMat;
+			GPM::Matrix4<float>& parentWorld = bone.GetParent()->GetWorldTransform();
 			
-			DrawLine(parentWorld[3] * lineSizeMultiplier, parentWorld[7] * lineSizeMultiplier, parentWorld[11] * lineSizeMultiplier,
-				boneWorld[3] * lineSizeMultiplier, boneWorld[7] * lineSizeMultiplier, boneWorld[11] * lineSizeMultiplier, p_color.x, p_color.y, p_color.z);
+			DrawLine(parentWorld[3], parentWorld[7], parentWorld[11],
+				boneWorld[3], boneWorld[7], boneWorld[11], 
+				p_color.x, p_color.y, p_color.z);
 		}
 
 	}
@@ -57,8 +58,6 @@ void Skeleton::DrawSkeleton(const GPM::Vector3F& p_color)
 
 void Skeleton::DrawTPose(const GPM::Vector3F& p_color)
 {
-	const float lineSizeMultiplier = 1.0f;
-
 	for (auto& bone : m_bones)
 	{
 		GPM::Matrix4<float>& boneWorld = bone.GetWorldTPose();
@@ -67,8 +66,9 @@ void Skeleton::DrawTPose(const GPM::Vector3F& p_color)
 		{
 			GPM::Matrix4<float>& parentWorld = bone.GetParent()->GetWorldTPose();
 
-			DrawLine(parentWorld[3] * lineSizeMultiplier, parentWorld[7] * lineSizeMultiplier, parentWorld[11] * lineSizeMultiplier,
-				boneWorld[3] * lineSizeMultiplier, boneWorld[7] * lineSizeMultiplier, boneWorld[11] * lineSizeMultiplier, p_color.x, p_color.y, p_color.z);
+			DrawLine(parentWorld[3], parentWorld[7], parentWorld[11],
+				boneWorld[3], boneWorld[7], boneWorld[11], 
+				p_color.x, p_color.y, p_color.z);
 		}
 
 	}
@@ -86,10 +86,8 @@ void Skeleton::ComputeBones(Bone* p_bone)
 
 	if (p_bone->GetParent() != nullptr)
 	{
-		//Matrix4<float> newTrans = p_bone->GetParent()->GetWorldTransform() * p_bone->GetLocalTransform();
-		Matrix4<float> worldTPos = p_bone->GetParent()->GetWorldTPose() * p_bone->GetLocalTPose();
+		const Matrix4<float> worldTPos = p_bone->GetParent()->GetWorldTPose() * p_bone->GetLocalTPose();
 
-		//TODO
 		p_bone->SetWorldTransform(worldTPos);
 		p_bone->SetWorldTPose(worldTPos);
 	}
@@ -99,9 +97,9 @@ void Skeleton::ComputeBones(Bone* p_bone)
 		p_bone->SetWorldTPose(p_bone->GetLocalTPose());
 	}
 	
-	for (size_t i = 0; i < p_bone->GetChildren().size(); ++i)
+	for (auto child: p_bone->GetChildren())
 	{
-		ComputeBones(p_bone->GetChildren()[i]);
+		ComputeBones(child);
 	}
 }
 
@@ -122,20 +120,27 @@ void Skeleton::PrintSkeleton()
 	std::cout << "\n\n----END PRINT SKELETON----\n\n";
 }
 
-void Skeleton::Animate(int p_animationIndex, float p_frame)
-{	
-	int frame1 = static_cast<int>(p_frame) % m_animations[p_animationIndex].GetAnimSkeletons().size();
-	int frame2 = frame1 + 1;
-	int timer = static_cast<int>(p_frame);
+void Skeleton::Animate(int p_animationIndex, float p_time, float p_animSpeed)
+{
+	const int keyFrames = m_animations[p_animationIndex].GetAnimSkeletons().size();
+	const float animTime = p_time * p_animSpeed * keyFrames; //animations are sampled at 30 frames / second
+	const int timer = static_cast<int>(animTime);
+	unsigned int frame1 = static_cast<int>(animTime) % keyFrames;
+	unsigned int frame2 = frame1 + 1;
+
+	if (p_animSpeed < 0)
+	{
+		const int tmp = frame1;
+		frame2 = frame1;
+		frame1 = tmp;
+	}
 	
-	if (frame2 >= m_animations[p_animationIndex].GetAnimSkeletons().size())
+	if (frame2 >= keyFrames)
 	{
 		frame2 = 0;
 	}
-
-	float posX, posY, posZ, quatW, quatX, quatY, quatZ;
-
-	float matrices[976];
+	
+	float* matrices = new float[m_bones.size() * 16];
 	
 	for (size_t i = 0; i < m_bones.size(); ++i)
 	{
@@ -147,8 +152,8 @@ void Skeleton::Animate(int p_animationIndex, float p_frame)
 			Quaternion quat1 = m_animations[p_animationIndex].GetAnimSkeletons()[frame1].m_animBones[i].m_quaternion;
 			Quaternion quat2 = m_animations[p_animationIndex].GetAnimSkeletons()[frame2].m_animBones[i].m_quaternion;
 
-			Vector3F posFinal = GPM::Vector3F::Lerp(pos1, pos2, p_frame - timer);
-			Quaternion quatFinal = GPM::Quaternion::SlerpShortestPath(quat1, quat2, p_frame - timer);
+			Vector3F posFinal = GPM::Vector3F::Lerp(pos1, pos2, animTime - static_cast<float>(timer));
+			Quaternion quatFinal = GPM::Quaternion::SlerpShortestPath(quat1, quat2, animTime - static_cast<float>(timer));
 
 			GPM::Matrix4F anim = GPM::Matrix4F::CreateTransformation(posFinal, quatFinal, { 1, 1, 1 });
 
@@ -158,22 +163,23 @@ void Skeleton::Animate(int p_animationIndex, float p_frame)
 			m_bones[i].SetWorldTransform(m_bones[i].GetLocalTPose());
 		
 		if (m_bones[i].GetParent())
-			m_bones[i].m_FinalMat = m_bones[i].GetParent()->m_FinalMat * m_bones[i].GetWorldTransform();
+			m_bones[i].GetWorldTransform() = m_bones[i].GetParent()->GetWorldTransform() * m_bones[i].GetWorldTransform();
 		else
-			m_bones[i].m_FinalMat = m_bones[i].GetWorldTransform();
+			m_bones[i].GetWorldTransform() = m_bones[i].GetWorldTransform();
 		
-		Matrix4F patate = m_bones[i].m_FinalMat * GPM::Matrix4F::Inverse(m_bones[i].GetWorldTPose());
+		Matrix4F finalMatrix = m_bones[i].GetWorldTransform() * GPM::Matrix4F::Inverse(m_bones[i].GetWorldTPose());
 		
 		int matrixIndex = 0;
 
 		for (int j = i * 16; j < 16 + (i * 16); ++j)
 		{
-			matrices[j] = patate[matrixIndex];
+			matrices[j] = finalMatrix[matrixIndex];
 			++matrixIndex;
 		}
 	}
 	
 	SetSkinningPose(matrices, m_bones.size());
+	delete[] matrices;
 }
 
 void Skeleton::AddAnimation(const char* p_anim, const char* p_name)

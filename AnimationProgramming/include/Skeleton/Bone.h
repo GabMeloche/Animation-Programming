@@ -9,7 +9,6 @@ public:
 	{
 		m_localTransform = GPM::Matrix4<float>::CreateTransformation(p_pos, p_quat, { 1, 1, 1 });
 		m_localTPose = m_localTransform;
-		m_FinalMat = GPM::Matrix4<float>::identity;
 	}
 	
 	~Bone() = default;
@@ -35,7 +34,6 @@ public:
 	inline GPM::Matrix4<float>& GetWorldTPose() { return m_WorldTPose; }
 	inline void SetWorldTPose(const GPM::Matrix4<float>& p_other) { m_WorldTPose = p_other; }
 	
-	GPM::Matrix4<float> m_FinalMat;
 	
 private:
 	Bone* m_parent = nullptr;
