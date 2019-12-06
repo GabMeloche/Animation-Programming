@@ -6,8 +6,8 @@
 class InputManager
 {
 public:
-	InputManager() = default;
-	~InputManager() = default;
+	InputManager() = delete;
+	~InputManager() = delete;
 
 	static void ProcessInputs(RenderingInfo& p_renderingInfo);
 };

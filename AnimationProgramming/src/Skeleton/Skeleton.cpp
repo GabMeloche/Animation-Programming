@@ -122,7 +122,7 @@ void Skeleton::PrintSkeleton()
 
 void Skeleton::Animate(int p_animationIndex, float p_time, float p_animSpeed)
 {
-	const int keyFrames = m_animations[p_animationIndex].GetAnimSkeletons().size();
+	const unsigned int keyFrames = m_animations[p_animationIndex].GetAnimSkeletons().size();
 	const float animTime = p_time * p_animSpeed * keyFrames; //animations are sampled at 30 frames / second
 	const int timer = static_cast<int>(animTime);
 	unsigned int frame1 = static_cast<int>(animTime) % keyFrames;
