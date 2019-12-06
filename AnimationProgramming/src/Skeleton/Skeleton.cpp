@@ -123,21 +123,21 @@ void Skeleton::PrintSkeleton()
 void Skeleton::Animate(int p_animationIndex, float p_time, float p_animSpeed)
 {
 	const unsigned int keyFrames = m_animations[p_animationIndex].GetAnimSkeletons().size();
-	const float animTime = p_time * p_animSpeed * keyFrames; //animations are sampled at 30 frames / second
+	const float animTime = p_time * p_animSpeed * 30; //animations are sampled at 30 frames / second
 	const int timer = static_cast<int>(animTime);
-	unsigned int frame1 = static_cast<int>(animTime) % keyFrames;
-	unsigned int frame2 = frame1 + 1;
+	unsigned int currentFrame = static_cast<int>(animTime) % keyFrames;
+	unsigned int nextFrame = currentFrame + 1;
 
 	if (p_animSpeed < 0)
 	{
-		const int tmp = frame1;
-		frame2 = frame1;
-		frame1 = tmp;
+		const unsigned int tmp = currentFrame;
+		nextFrame = currentFrame;
+		currentFrame = tmp;
 	}
 	
-	if (frame2 >= keyFrames)
+	if (nextFrame >= keyFrames)
 	{
-		frame2 = 0;
+		nextFrame = 0;
 	}
 	
 	float* matrices = new float[m_bones.size() * 16];
@@ -146,13 +146,13 @@ void Skeleton::Animate(int p_animationIndex, float p_time, float p_animSpeed)
 	{
 		if (p_animationIndex >= 0)
 		{
-			Vector3F pos1 = m_animations[p_animationIndex].GetAnimSkeletons()[frame1].m_animBones[i].m_position;
-			Vector3F pos2 = m_animations[p_animationIndex].GetAnimSkeletons()[frame2].m_animBones[i].m_position;
+			Vector3F pos1 = m_animations[p_animationIndex].GetAnimSkeletons()[currentFrame].m_animBones[i].m_position;
+			Vector3F pos2 = m_animations[p_animationIndex].GetAnimSkeletons()[nextFrame].m_animBones[i].m_position;
 
-			Quaternion quat1 = m_animations[p_animationIndex].GetAnimSkeletons()[frame1].m_animBones[i].m_quaternion;
-			Quaternion quat2 = m_animations[p_animationIndex].GetAnimSkeletons()[frame2].m_animBones[i].m_quaternion;
+			Quaternion quat1 = m_animations[p_animationIndex].GetAnimSkeletons()[currentFrame].m_animBones[i].m_quaternion;
+			Quaternion quat2 = m_animations[p_animationIndex].GetAnimSkeletons()[nextFrame].m_animBones[i].m_quaternion;
 
-			Vector3F posFinal = GPM::Vector3F::Lerp(pos1, pos2, animTime - static_cast<float>(timer));
+			Vector3F posFinal = GPM::Vector3F::Lerp(pos1, pos2,  animTime - static_cast<float>(timer));
 			Quaternion quatFinal = GPM::Quaternion::SlerpShortestPath(quat1, quat2, animTime - static_cast<float>(timer));
 
 			GPM::Matrix4F anim = GPM::Matrix4F::CreateTransformation(posFinal, quatFinal, { 1, 1, 1 });
@@ -164,14 +164,12 @@ void Skeleton::Animate(int p_animationIndex, float p_time, float p_animSpeed)
 		
 		if (m_bones[i].GetParent())
 			m_bones[i].GetWorldTransform() = m_bones[i].GetParent()->GetWorldTransform() * m_bones[i].GetWorldTransform();
-		else
-			m_bones[i].GetWorldTransform() = m_bones[i].GetWorldTransform();
 		
 		Matrix4F finalMatrix = m_bones[i].GetWorldTransform() * GPM::Matrix4F::Inverse(m_bones[i].GetWorldTPose());
 		
 		int matrixIndex = 0;
 
-		for (int j = i * 16; j < 16 + (i * 16); ++j)
+		for (size_t j = i * 16; j < 16 + (i * 16); ++j)
 		{
 			matrices[j] = finalMatrix[matrixIndex];
 			++matrixIndex;
